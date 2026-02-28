@@ -1,18 +1,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#ifdef __linux__
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
-#endif // __linux
 #include <iostream>
 #include <thread>
 
 using namespace std;
-
-void myerror(const char* msg) { fprintf(stderr, "%s %s %d\n", msg, strerror(errno), errno); }
 
 struct Param {
 	string command_;
@@ -23,8 +19,10 @@ struct Param {
 			exit(0);
 		}
 
-		if (argc > 3 && strcmp(argv[1], "-c") == 0)
-			command_ = stoi(argv[2]);
+		if (argc >= 3 && strcmp(argv[1], "-c") == 0) {
+			fprintf(stderr, "%s\n", argv[2]); // gilgil temp 2026.03.01
+			command_ = argv[2];
+		}
 
 		return true;
 	}
@@ -43,17 +41,20 @@ void process(int sd) {
 	while (true) {
 		ssize_t res = ::recv(sd, buf, BUFSIZE - 1, 0);
 		if (res == 0 || res == -1) {
-			fprintf(stderr, "recv return %zd", res);
-			myerror(" ");
+			fprintf(stderr, "recv return %zd %s %d\n", res, strerror(errno), errno);
 			break;
 		}
 		buf[res] = '\0';
 		printf("%s", buf);
 		fflush(stdout);
 	}
+	fprintf(stderr, "1111\n"); // gilgil temp 2026.03.01
 	fflush(stdout);
+	fprintf(stderr, "222\n"); // gilgil temp 2026.03.01
 	::close(sd);
-	exit(0);
+	fprintf(stderr, "333\n"); // gilgil temp 2026.03.01
+	pthread_exit(NULL);
+	fprintf(stderr, "after exit 44444\n"); // gilgil temp 2026.03.01
 }
 
 int main(int argc, char* argv[]) {
@@ -65,7 +66,7 @@ int main(int argc, char* argv[]) {
 	//
 	int sd = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (sd == -1) {
-		fprintf(stderr, "socket return -1 %s %d", strerror(errno), errno);
+		fprintf(stderr, "socket return -1 %s %d\n", strerror(errno), errno);
 		return -1;
 	}
 
@@ -77,7 +78,7 @@ int main(int argc, char* argv[]) {
 		int optval = 1;
 		int res = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
 		if (res == -1) {
-			myerror("setsockopt");
+			fprintf(stderr, "setsockopt return -1 %s %d\n", strerror(errno), errno);
 			return -1;
 		}
 	}
@@ -93,25 +94,37 @@ int main(int argc, char* argv[]) {
 	{
 		int res = ::connect(sd, (struct sockaddr*)&addr, sizeof(addr));
 		if (res == -1) {
-			myerror("connect");
+			fprintf(stderr, "connect return -1 %s %d\n", strerror(errno), errno);
 			return -1;
 		}
 	}
 
-	std::thread t(process, sd);
+	thread t(process, sd);
 	t.detach();
 
-	while (true) {
-		std::string s;
-		std::getline(std::cin, s);
-		if (s == "exit") break;
-		s += "\r\n";
-		ssize_t res = ::send(sd, s.data(), s.size(), 0);
+	if (param.command_ != "") {
+		string cmd = param.command_;
+		cmd += "\n";
+		ssize_t res = ::send(sd, cmd.data(), cmd.size(), 0);
 		if (res == 0 || res == -1) {
-			fprintf(stderr, "send return %zd", res);
-			myerror(" ");
-			break;
+			fprintf(stderr, "send return %zd %s %d\n", res, strerror(errno), errno);
+		}
+		this_thread::sleep_for(1s); // gilgil temp 2026.03.01
+	} else {
+		while (true) {
+			string cmd;
+			fprintf(stderr, "bef getline\n"); // gilgil temp 2026.03.01
+			getline(cin, cmd);
+			fprintf(stderr, "aft getline\n"); // gilgil temp 2026.03.01
+			if (cmd == "exit") break;
+			cmd += "\n";
+			ssize_t res = ::send(sd, cmd.data(), cmd.size(), 0);
+			if (res == 0 || res == -1) {
+				fprintf(stderr, "send return %zd %s %d\n", res, strerror(errno), errno);
+				break;
+			}
 		}
 	}
 	::close(sd);
+	fprintf(stderr, "terminated successfully\n");
 }

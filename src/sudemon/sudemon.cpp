@@ -56,7 +56,7 @@ void process(int sd) {
 	fflush(stdout);
 	static const int BUFSIZE = 65536;
 	char buf[BUFSIZE];
-	std::string cmd;
+	string cmd;
 	while (true) {
 		ssize_t res = ::recv(sd, buf, BUFSIZE - 1, 0);
 		if (res == 0 || res == -1) {
@@ -69,7 +69,7 @@ void process(int sd) {
 		size_t i = 0;
 		while (i < cmd.size()) {
 			if (cmd.at(i) =='\n') {
-				std::string oneCmd = cmd.substr(0, i);
+				string oneCmd = cmd.substr(0, i);
 				if (oneCmd.at(oneCmd.size() - 1) == '\r')
 					oneCmd = oneCmd.substr(0, oneCmd.size() - 1);
 				GTRACE("cmd=%s", oneCmd.data());
@@ -179,7 +179,7 @@ int main(int argc, char* argv[]) {
 			break;
 		}
 
-		std::thread* t = new std::thread(process, newsd);
+		thread* t = new thread(process, newsd);
 		t->detach();
 	}
 	::close(_acceptSocket);
