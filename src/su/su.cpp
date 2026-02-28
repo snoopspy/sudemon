@@ -40,7 +40,6 @@ struct Param {
 } param;
 
 void process(int sd) {
-	printf("connected\n");
 	fflush(stdout);
 	static const int BUFSIZE = 65536;
 	char buf[BUFSIZE];
@@ -55,7 +54,6 @@ void process(int sd) {
 		printf("%s", buf);
 		fflush(stdout);
 	}
-	printf("disconnected\n");
 	fflush(stdout);
 	::close(sd);
 	exit(0);
@@ -111,6 +109,7 @@ int main(int argc, char* argv[]) {
 	while (true) {
 		std::string s;
 		std::getline(std::cin, s);
+		if (s == "exit") break;
 		s += "\r\n";
 		ssize_t res = ::send(sd, s.data(), s.size(), 0);
 		if (res == 0 || res == -1) {
