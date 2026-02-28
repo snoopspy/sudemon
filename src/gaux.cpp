@@ -13,10 +13,9 @@ std::string GAux::getDir(std::string argv) {
 	return "/";
 }
 
-
 const char* GAux::getVersion() {
 	const char* version =
-#include "../../version.txt"
+#include "../version.txt"
 	;
 
 	return version;
