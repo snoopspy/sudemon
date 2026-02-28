@@ -52,7 +52,7 @@ void signalHandler(int signo) {
 }
 
 void process(int sd) {
-	printf("connected\n");
+	GTRACE("connected");
 	fflush(stdout);
 	static const int BUFSIZE = 65536;
 	char buf[BUFSIZE];
@@ -64,7 +64,6 @@ void process(int sd) {
 			break;
 		}
 		buf[res] = '\0';
-		GTRACE("%s", buf); // gilgil temp 2026.02.28
 		cmd += buf;
 
 		size_t i = 0;
@@ -76,7 +75,6 @@ void process(int sd) {
 				GTRACE("cmd=%s", oneCmd.data());
 
 				cmd = cmd.substr(i + 1);
-				GTRACE("remain=%s", cmd.data());
 
 				if (oneCmd == "") continue;
 
@@ -99,7 +97,7 @@ void process(int sd) {
 			}
 		}
 	}
-	printf("disconnected\n");
+	GTRACE("disconnected");
 	::close(sd);
 }
 
