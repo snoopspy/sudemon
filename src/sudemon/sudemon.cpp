@@ -1,4 +1,5 @@
 #include <cstring>
+#include <cstdlib>
 #include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -50,6 +51,52 @@ void signalHandler(int signo) {
     GTRACE("bef close(sd %d)", sd);
 }
 
+void recvThread(int sd) {
+    printf("connected\n");
+    fflush(stdout);
+    static const int BUFSIZE = 65536;
+    char cmd[BUFSIZE];
+    while (true) {
+        ssize_t res = ::recv(sd, cmd, BUFSIZE - 1, 0);
+        if (res == 0 || res == -1) {
+            GTRACE("recv return %zd", res);
+            break;
+        }
+        cmd[res] = '\0';
+        GTRACE("%s", cmd); // gilgil temp 2026.02.28
+
+        FILE *fp;
+        char path[1035];
+
+        fp = popen("ls -l", "r");
+        if (fp == nullptr) {
+            GTRACE("fail to popen(%s)", buf);
+            exit(1);
+        }
+
+        // 결과 한 줄씩 읽어서 출력
+        while (fgets(path, sizeof(path), fp) != NULL) {
+            printf("받은 데이터: %s", path);
+        }
+
+        // 파이프 닫기
+        pclose(fp);
+
+        fflush(stdout);
+        if (param.echo) {
+            res = ::send(sd, buf, res, 0);
+            if (res == 0 || res == -1) {
+                fprintf(stderr, "send return %zd", res);
+                myerror(" ");
+                break;
+            }
+        }
+    }
+    printf("disconnected\n");
+    fflush(stdout);
+    ::close(sd);
+}
+
 int main(int argc, char* argv[]) {
     if (!param.parse(argc, argv)) {
         Param::usage();
@@ -98,8 +145,8 @@ int main(int argc, char* argv[]) {
     {
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
-        addr.sin_addr.s_addr = param.srcIp;
-        addr.sin_port = htons(param.port);
+        addr.sin_addr.s_addr = INADDR_ANY;
+        addr.sin_port = htons(param.port_);
 
         ssize_t res = ::bind(sd, (struct sockaddr *)&addr, sizeof(addr));
         if (res == -1) {
@@ -128,38 +175,10 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        //
-        // keepalive
-        //
-        if (param.keepAlive_.idle_ != 0) {
-            int optval = 1;
-            if (setsockopt(newsd, SOL_SOCKET, SO_KEEPALIVE, (const char*)&optval, sizeof(int)) < 0) {
-                myerror("setsockopt(SO_KEEPALIVE)");
-                return -1;
-            }
-
-            if (setsockopt(newsd, IPPROTO_TCP, TCP_KEEPIDLE, (const char*)&param.keepAlive_.idle_, sizeof(int)) < 0) {
-                myerror("setsockopt(TCP_KEEPIDLE)");
-                return -1;
-            }
-
-            if (setsockopt(newsd, IPPROTO_TCP, TCP_KEEPINTVL, (const char*)&param.keepAlive_.interval_, sizeof(int)) < 0) {
-                myerror("setsockopt(TCP_KEEPINTVL)");
-                return -1;
-            }
-
-            if (setsockopt(newsd, IPPROTO_TCP, TCP_KEEPCNT, (const char*)&param.keepAlive_.count_, sizeof(int)) < 0) {
-                myerror("setsockopt(TCP_KEEPCNT)");
-                return -1;
-            }
-        }
-
         std::thread* t = new std::thread(recvThread, newsd);
         t->detach();
     }
     ::close(sd);
-}
-
 
     GTRACE("sudemon terminated successfully");
 }
