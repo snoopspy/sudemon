@@ -14,15 +14,6 @@ using namespace std;
 
 void myerror(const char* msg) { fprintf(stderr, "%s %s %d\n", msg, strerror(errno), errno); }
 
-void usage() {
-	printf("tcp client %s\n",
-#include "../version.txt"
-	);
-	printf("\n");
-	printf("syntax: tc <ip> <port> [-si <src ip>] [-sp <src port>] [-kaidle <keepalive idle> -kaintv <keepalive interval> -kacnt <keepalive count>]\n");
-	printf("sample: tc 127.0.0.1 1234 -kidle 60\n");
-}
-
 struct Param {
 	string command_;
 
@@ -36,6 +27,12 @@ struct Param {
 			command_ = stoi(argv[2]);
 
 		return true;
+	}
+
+	void usage() {
+		printf("su version %s\n",
+#include "../version.txt"
+		);
 	}
 } param;
 
@@ -60,10 +57,8 @@ void process(int sd) {
 }
 
 int main(int argc, char* argv[]) {
-	if (!param.parse(argc, argv)) {
-		usage();
+	if (!param.parse(argc, argv))
 		return -1;
-	}
 
 	//
 	// socket
