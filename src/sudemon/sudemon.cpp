@@ -14,29 +14,29 @@
 using namespace std;
 
 struct Param {
-    int port_{1818};
+	int port_{9999};
 
 	bool parse(int argc, char* argv[]) {
-        if (argc > 2) {
+		if (argc > 2) {
 			usage();
 			return false;
 		}
 
-        if (argc == 2)
-            port_ = atoi(argv[1]);
+		if (argc == 2)
+			port_ = atoi(argv[1]);
 
-        return true;
+		return true;
 	}
 
-    static void usage() {
-        cerr << "ssdemon version " << GAux::getVersion() << endl;
+	static void usage() {
+		cerr << "ssdemon version " << GAux::getVersion() << endl;
 		cerr << endl;
-        cerr << "syntax: sudemon [<port>]\n";
-        cerr << "sample: sudemon 1818\n";
+		cerr << "syntax: sudemon [<port>]\n";
+		cerr << "sample: sudemon 9999\n";
 	}
 } param;
 
-int sd{0};
+int _acceptSocket{0};
 
 void signalHandler(int signo) {
 	const char* signal = GSignal::getString(signo);
@@ -46,64 +46,70 @@ void signalHandler(int signo) {
 		return;
 	if (signo == SIGSEGV)
 		exit(-1);
-    GTRACE("bef close(sd %d)", sd);
-    ::close(sd);
-    GTRACE("bef close(sd %d)", sd);
+	GTRACE("bef close(sd %d)", _acceptSocket);
+	::close(_acceptSocket);
+	GTRACE("bef close(sd %d)", _acceptSocket);
 }
 
-void recvThread(int sd) {
-    printf("connected\n");
-    fflush(stdout);
-    static const int BUFSIZE = 65536;
-    char cmd[BUFSIZE];
-    while (true) {
-        ssize_t res = ::recv(sd, cmd, BUFSIZE - 1, 0);
-        if (res == 0 || res == -1) {
-            GTRACE("recv return %zd", res);
-            break;
-        }
-        cmd[res] = '\0';
-        GTRACE("%s", cmd); // gilgil temp 2026.02.28
+void process(int sd) {
+	printf("connected\n");
+	fflush(stdout);
+	static const int BUFSIZE = 65536;
+	char buf[BUFSIZE];
+	std::string cmd;
+	while (true) {
+		ssize_t res = ::recv(sd, buf, BUFSIZE - 1, 0);
+		if (res == 0 || res == -1) {
+			GTRACE("recv return %zd", res);
+			break;
+		}
+		buf[res] = '\0';
+		GTRACE("%s", buf); // gilgil temp 2026.02.28
+		cmd += buf;
 
-        FILE *fp;
-        char path[1035];
+		size_t i = 0;
+		while (i < cmd.size()) {
+			if (cmd.at(i) =='\n') {
+				std::string oneCmd = cmd.substr(0, i);
+				if (oneCmd.at(oneCmd.size() - 1) == '\r')
+					oneCmd = oneCmd.substr(0, oneCmd.size() - 1);
+				GTRACE("cmd=%s", oneCmd.data());
 
-        fp = popen("ls -l", "r");
-        if (fp == nullptr) {
-            GTRACE("fail to popen(%s)", buf);
-            exit(1);
-        }
+				cmd = cmd.substr(i + 1);
+				GTRACE("remain=%s", cmd.data());
 
-        // 결과 한 줄씩 읽어서 출력
-        while (fgets(path, sizeof(path), fp) != NULL) {
-            printf("받은 데이터: %s", path);
-        }
+				if (oneCmd == "") continue;
 
-        // 파이프 닫기
-        pclose(fp);
+				FILE* fp = popen(oneCmd.data(), "r");
+				if (fp == nullptr) {
+					GTRACE("fail to popen(%s)", buf);
+					exit(1);
+				}
 
-        fflush(stdout);
-        if (param.echo) {
-            res = ::send(sd, buf, res, 0);
-            if (res == 0 || res == -1) {
-                fprintf(stderr, "send return %zd", res);
-                myerror(" ");
-                break;
-            }
-        }
-    }
-    printf("disconnected\n");
-    fflush(stdout);
-    ::close(sd);
+				char result[BUFSIZE];
+				while (::fgets(result, BUFSIZE, fp) != nullptr) {
+					size_t len = strlen(result);
+					::send(sd, result, len, 0);
+				}
+				pclose(fp);
+
+				i = 0;
+			} else {
+				i++;
+			}
+		}
+	}
+	printf("disconnected\n");
+	::close(sd);
 }
 
 int main(int argc, char* argv[]) {
-    if (!param.parse(argc, argv)) {
-        Param::usage();
-        return -1;
-    }
+	if (!param.parse(argc, argv)) {
+		Param::usage();
+		return -1;
+	}
 
-    gtrace_default("127.0.0.1", 8908, false, "sudemon.log");
+	gtrace_default(nullptr, 0, true, nullptr);
 
 	char wd[BUFSIZ];
 	memset(wd, 0, BUFSIZ);
@@ -112,73 +118,73 @@ int main(int argc, char* argv[]) {
 	int res = chdir(GAux::getDir(argv[0]).data());
 	if (res != 0)
 		GTRACE("chdir return %d", res);
-    GTRACE("sudemon %s started login=%s dir=%s %s %s", GAux::getVersion(), getlogin(), wd, __DATE__, __TIME__);
+	GTRACE("sudemon %s started login=%s dir=%s %s %s", GAux::getVersion(), getlogin(), wd, __DATE__, __TIME__);
 
 	GSignal::instance().setupAll(signalHandler);
 
-    //
-    // socket
-    //
-    int sd = ::socket(AF_INET, SOCK_STREAM, 0);
-    if (sd == -1) {
-        myerror("socket");
-        return -1;
-    }
+	//
+	// socket
+	//
+	_acceptSocket = ::socket(AF_INET, SOCK_STREAM, 0);
+	if (_acceptSocket == -1) {
+		GTRACE("socket return -1 %s %d", strerror(errno), errno);
+		return -1;
+	}
 
 #ifdef __linux__
-    //
-    // setsockopt
-    //
-    {
-        int optval = 1;
-        int res = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
-        if (res == -1) {
-            myerror("setsockopt");
-            return -1;
-        }
-    }
+	//
+	// setsockopt
+	//
+	{
+		int optval = 1;
+		int res = ::setsockopt(_acceptSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
+		if (res == -1) {
+			GTRACE("setsockopt return -1 %s %d", strerror(errno), errno);
+			return -1;
+		}
+	}
 #endif // __linux
 
-    //
-    // bind
-    //
-    {
-        struct sockaddr_in addr;
-        addr.sin_family = AF_INET;
-        addr.sin_addr.s_addr = INADDR_ANY;
-        addr.sin_port = htons(param.port_);
+	//
+	// bind
+	//
+	{
+		struct sockaddr_in addr;
+		addr.sin_family = AF_INET;
+		addr.sin_addr.s_addr = ntohl(0x7F090909); // 127.9.9.9
+		addr.sin_port = htons(param.port_);
 
-        ssize_t res = ::bind(sd, (struct sockaddr *)&addr, sizeof(addr));
-        if (res == -1) {
-            myerror("bind");
-            return -1;
-        }
-    }
+		ssize_t res = ::bind(_acceptSocket, (struct sockaddr *)&addr, sizeof(addr));
+		if (res == -1) {
+			GTRACE("bind return -1 %s %d", strerror(errno), errno);
+			return -1;
+		}
+	}
 
-    //
-    // listen
-    //
-    {
-        int res = listen(sd, 5);
-        if (res == -1) {
-            myerror("listen");
-            return -1;
-        }
-    }
+	//
+	// listen
+	//
+	{
+		int res = listen(_acceptSocket, 5);
+		if (res == -1) {
+			GTRACE("listen return -1 %s %d", strerror(errno), errno);
+			return -1;
+		}
+	}
 
-    while (true) {
-        struct sockaddr_in addr;
-        socklen_t len = sizeof(addr);
-        int newsd = ::accept(sd, (struct sockaddr *)&addr, &len);
-        if (newsd == -1) {
-            myerror("accept");
-            break;
-        }
+	while (true) {
+		struct sockaddr_in addr;
+		socklen_t len = sizeof(addr);
+		int newsd = ::accept(_acceptSocket, (struct sockaddr *)&addr, &len);
+		if (newsd == -1) {
+			GTRACE("accept return -1 %s %d", strerror(errno), errno);
+			break;
+		}
 
-        std::thread* t = new std::thread(recvThread, newsd);
-        t->detach();
-    }
-    ::close(sd);
+		std::thread* t = new std::thread(process, newsd);
+		t->detach();
+	}
+	::close(_acceptSocket);
 
-    GTRACE("sudemon terminated successfully");
+	GTRACE("sudemon terminated successfully");
 }
