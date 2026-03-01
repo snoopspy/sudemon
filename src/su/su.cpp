@@ -27,7 +27,7 @@ struct Param {
 		return true;
 	}
 
-	void usage() {
+	static void usage() {
 		printf("su version %s\n",
 #include "../version.txt"
 		);
