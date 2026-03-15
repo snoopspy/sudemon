@@ -71,7 +71,7 @@ void process(int sd) {
 		size_t len = strlen(result);
 		ssize_t writeLen = ::send(sd, result, len, 0);
 		if (writeLen == 0 || writeLen == -1) {
-			GTRACE("send return %ld", writeLen);
+			GTRACE("send return %d", (int)writeLen);
 			break;
 		}
 	}
