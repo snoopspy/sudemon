@@ -48,7 +48,7 @@ void signalHandler(int signo) {
 		exit(-1);
 	GTRACE("bef close(sd %d)", _acceptSocket);
 	::close(_acceptSocket);
-	GTRACE("bef close(sd %d)", _acceptSocket);
+	GTRACE("aft close(sd %d)", _acceptSocket);
 }
 
 void process(int sd) {
