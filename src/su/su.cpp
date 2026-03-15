@@ -1,28 +1,29 @@
+#include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
-#include <iostream>
-#include <thread>
-
-using namespace std;
+#include <string>
 
 struct Param {
-	string command_;
+	std::string command_;
 
 	bool parse(int argc, char* argv[]) {
-		if (argc == 2 && strcmp(argv[1], "--version") == 0) {
+		if (argc < 3) {
 			usage();
-			exit(0);
+			return false;
 		}
 
-		if (argc >= 3 && strcmp(argv[1], "-c") == 0) {
-			fprintf(stderr, "%s\n", argv[2]); // gilgil temp 2026.03.01
-			command_ = argv[2];
+		if (strcmp(argv[1], "-c") != 0) {
+			usage();
+			return false;
 		}
+
+		command_ = argv[2];
 
 		return true;
 	}
@@ -31,31 +32,11 @@ struct Param {
 		printf("su version %s\n",
 #include "../version.txt"
 		);
+
+		printf("syntax : su -c <command>\n");
+		printf("sample : su -c whoami\n");
 	}
 } param;
-
-void process(int sd) {
-	fflush(stdout);
-	static const int BUFSIZE = 65536;
-	char buf[BUFSIZE];
-	while (true) {
-		ssize_t res = ::recv(sd, buf, BUFSIZE - 1, 0);
-		if (res == 0 || res == -1) {
-			fprintf(stderr, "recv return %zd %s %d\n", res, strerror(errno), errno);
-			break;
-		}
-		buf[res] = '\0';
-		printf("%s", buf);
-		fflush(stdout);
-	}
-	fprintf(stderr, "1111\n"); // gilgil temp 2026.03.01
-	fflush(stdout);
-	fprintf(stderr, "222\n"); // gilgil temp 2026.03.01
-	::close(sd);
-	fprintf(stderr, "333\n"); // gilgil temp 2026.03.01
-	pthread_exit(NULL);
-	fprintf(stderr, "after exit 44444\n"); // gilgil temp 2026.03.01
-}
 
 int main(int argc, char* argv[]) {
 	if (!param.parse(argc, argv))
@@ -99,32 +80,24 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	thread t(process, sd);
-	t.detach();
+	ssize_t res = ::send(sd, param.command_.data(), param.command_.size(), 0);
+	if (res == 0 || res == -1) {
+		fprintf(stderr, "send return %zd %s %d\n", res, strerror(errno), errno);
+	}
 
-	if (param.command_ != "") {
-		string cmd = param.command_;
-		cmd += "\n";
-		ssize_t res = ::send(sd, cmd.data(), cmd.size(), 0);
+	fflush(stdout);
+	static const int BUFSIZE = 65536;
+	char buf[BUFSIZE];
+	while (true) {
+		ssize_t res = ::recv(sd, buf, BUFSIZE - 1, 0);
 		if (res == 0 || res == -1) {
-			fprintf(stderr, "send return %zd %s %d\n", res, strerror(errno), errno);
+			// fprintf(stderr, "recv return %zd %s %d\n", res, strerror(errno), errno);
+			break;
 		}
-		this_thread::sleep_for(1s); // gilgil temp 2026.03.01
-	} else {
-		while (true) {
-			string cmd;
-			fprintf(stderr, "bef getline\n"); // gilgil temp 2026.03.01
-			getline(cin, cmd);
-			fprintf(stderr, "aft getline\n"); // gilgil temp 2026.03.01
-			if (cmd == "exit") break;
-			cmd += "\n";
-			ssize_t res = ::send(sd, cmd.data(), cmd.size(), 0);
-			if (res == 0 || res == -1) {
-				fprintf(stderr, "send return %zd %s %d\n", res, strerror(errno), errno);
-				break;
-			}
-		}
+		buf[res] = '\0';
+		printf("%s", buf);
+		fflush(stdout);
 	}
 	::close(sd);
-	fprintf(stderr, "terminated successfully\n");
+	// fprintf(stderr, "terminated successfully\n");
 }

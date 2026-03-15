@@ -1,6 +1,5 @@
 #include <cstring>
 #include <cstdlib>
-#include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -10,8 +9,6 @@
 #include "gaux.h"
 #include "gsignal.h"
 #include "gtrace.h"
-
-using namespace std;
 
 struct Param {
 	int port_{9999};
@@ -29,10 +26,10 @@ struct Param {
 	}
 
 	static void usage() {
-		cerr << "ssdemon version " << GAux::getVersion() << endl;
-		cerr << endl;
-		cerr << "syntax: sudemon [<port>]\n";
-		cerr << "sample: sudemon 9999\n";
+		printf("ssdemon version %s\n",  GAux::getVersion());
+		printf("\n");
+		printf("syntax: sudemon [<port>]\n");
+		printf("sample: sudemon 9999\n");
 	}
 } param;
 
@@ -52,58 +49,38 @@ void signalHandler(int signo) {
 }
 
 void process(int sd) {
-	GTRACE("connected");
 	fflush(stdout);
 	static const int BUFSIZE = 65536;
 	char buf[BUFSIZE];
-	string cmd;
-	while (true) {
-		ssize_t res = ::recv(sd, buf, BUFSIZE - 1, 0);
-		if (res == 0 || res == -1) {
-			GTRACE("recv return %zd", res);
+	ssize_t res = ::recv(sd, buf, BUFSIZE - 1, 0);
+	if (res == 0 || res == -1) {
+		GTRACE("recv return %zd", res);
+		return;
+	}
+	buf[res] = '\0';
+	GTRACE("cmd=%s", buf);
+
+	FILE* fp = popen(buf, "r");
+	if (fp == nullptr) {
+		GTRACE("fail to popen(%s)", buf);
+		exit(1);
+	}
+
+	char result[BUFSIZE];
+	while (::fgets(result, BUFSIZE, fp) != nullptr) {
+		size_t len = strlen(result);
+		ssize_t writeLen = ::send(sd, result, len, 0);
+		if (writeLen == 0 || writeLen == -1) {
+			GTRACE("send return %ld", writeLen);
 			break;
 		}
-		buf[res] = '\0';
-		cmd += buf;
-
-		size_t i = 0;
-		while (i < cmd.size()) {
-			if (cmd.at(i) =='\n') {
-				string oneCmd = cmd.substr(0, i);
-				if (oneCmd.at(oneCmd.size() - 1) == '\r')
-					oneCmd = oneCmd.substr(0, oneCmd.size() - 1);
-				GTRACE("cmd=%s", oneCmd.data());
-
-				cmd = cmd.substr(i + 1);
-
-				if (oneCmd == "") continue;
-
-				FILE* fp = popen(oneCmd.data(), "r");
-				if (fp == nullptr) {
-					GTRACE("fail to popen(%s)", buf);
-					exit(1);
-				}
-
-				char result[BUFSIZE];
-				while (::fgets(result, BUFSIZE, fp) != nullptr) {
-					size_t len = strlen(result);
-					::send(sd, result, len, 0);
-				}
-				pclose(fp);
-
-				i = 0;
-			} else {
-				i++;
-			}
-		}
 	}
-	GTRACE("disconnected");
+	pclose(fp);
 	::close(sd);
 }
 
 int main(int argc, char* argv[]) {
 	if (!param.parse(argc, argv)) {
-		Param::usage();
 		return -1;
 	}
 
@@ -179,7 +156,7 @@ int main(int argc, char* argv[]) {
 			break;
 		}
 
-		thread* t = new thread(process, newsd);
+		std::thread* t = new std::thread(process, newsd);
 		t->detach();
 	}
 	::close(_acceptSocket);
