@@ -32,7 +32,8 @@ struct Param {
 		printf("su version %s\n",
 #include "../version.txt"
 		);
-
+		printf("Copyright (c) Gilbert Lee All rights reserved\n");
+		printf("\n");
 		printf("syntax : su -c <command>\n");
 		printf("sample : su -c whoami\n");
 	}

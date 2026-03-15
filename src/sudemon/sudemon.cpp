@@ -27,6 +27,7 @@ struct Param {
 
 	static void usage() {
 		printf("ssdemon version %s\n",  GAux::getVersion());
+		printf("Copyright (c) Gilbert Lee All rights reserved\n");
 		printf("\n");
 		printf("syntax: sudemon [<port>]\n");
 		printf("sample: sudemon 9999\n");
