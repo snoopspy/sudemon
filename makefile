@@ -24,7 +24,7 @@ clean:
 
 install:
 	adb root
-	adb exec-out "mount -o rw,remount /"
+	adb exec-out "mount -o rw,remount /system"
 	adb push bin/su /system/bin/su2
 	adb exec-out "mv /system/bin/su2 /system/bin/su"
 	adb push bin/sudemon /system/bin/sudemon
@@ -32,10 +32,10 @@ install:
 	adb exec-out "chmod 755 /system/bin/su'"
 	adb exec-out "chmod 755 /system/bin/sudemon"
 	adb exec-out "chmod 755 /system/bin/sudemon.sh"
-	#adb exec-out "mount -o ro,remount /"
+	#adb exec-out "mount -o ro,remount /system"
 
 uninstall:
 	adb root
-	adb exec-out "mount -o rw,remount /"
+	adb exec-out "mount -o rw,remount /system"
 	adb exec-out "rm -f /system/bin/su /system/bin/sudemon /system/bin/sudemon.sh"
-	#adb exec-out "mount -o ro,remount /"
+	#adb exec-out "mount -o ro,remount /system"
