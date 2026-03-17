@@ -41,7 +41,7 @@ struct Param {
 
 int main(int argc, char* argv[]) {
 	if (!param.parse(argc, argv))
-		return -1;
+		return 0;
 
 	//
 	// socket
