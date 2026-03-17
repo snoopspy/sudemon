@@ -16,6 +16,7 @@ install:
 	adb exec-out "chmod 755 /system/bin/sudemon"
 	adb exec-out "chmod 755 /system/bin/sudemon.sh"
 	#adb exec-out "mount -o ro,remount /"
+	adb shell sudemon.sh
 
 uninstall:
 	adb root
