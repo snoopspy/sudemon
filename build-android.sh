@@ -17,5 +17,5 @@ cp ../bin/makefile .
 #
 # compress
 #
-tar czf ../sudemon-$(sed 's/"//g' ../version.txt).tar.gz *
+tar czf sudemon-$(sed 's/"//g' ../version.txt).tar.gz *
 cd ..
