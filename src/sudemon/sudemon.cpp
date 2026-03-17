@@ -163,4 +163,5 @@ int main(int argc, char* argv[]) {
 	::close(_acceptSocket);
 
 	GTRACE("sudemon terminated successfully");
+	GTRACE("");
 }
