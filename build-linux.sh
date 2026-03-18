@@ -12,7 +12,10 @@ cd release
 cp ../bin/su .
 cp ../bin/sudemon .
 cp ../bin/sudemon.sh .
-cp ../bin/makefile .
+cp ../bin/install .
+cp ../bin/start .
+cp ../bin/stop .
+cp ../bin/uninstall .
 
 #
 # compress
