@@ -1,33 +1,32 @@
-Simple lineage andriod rooting
+imple lineage andriod rooting
 ===
 
 This program allows you to easily perform rooting-related functions on Lineage Android.
 
-## Prerequirements
-* Lineage OS installed device
-* Developer options elabled
-* Root access "ADB only" selected
+### Prerequirements
+* Lineage OS installed device.
+* Developer options elabled.
+* Root access "ADB only" selected.
 
-## Download
+### Download
 * Just download tar.gz(for linux) or zip(for windows) files in release.
 
-## Install on Android
+### Install on Android
 * Call "android-install"
 
-## Uninstall on Android
+### Uninstall on Android
 * Call "android-uninstall"
 
-## Start rooting on Android
+### Start rooting on Android
 * Call "android-start"
 
-## Stop rooting on Android
-# Call "android-stop"
+### Stop rooting on Android
+* Call "android-stop"
 
 After rebooting, you can use the rooting function by simply calling "android-start" again.
 
+### Demo for Linux
+[![Video Label](http://img.youtube.com/vi/rpuQdk2IbzY/0.jpg)](https://youtu.be/rpuQdk2IbzY?t=0s)
 
-[Demo for Linux]
-<iframe width="560" height="315" src="https://www.youtube.com/embed/rpuQdk2IbzY?si=OVwmkrr23Qo-gkoB" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
-[Demo for Windows]
-<iframe width="560" height="315" src="https://www.youtube.com/embed/WWWuKCbMYFk?si=YWuFDfzKZkVMb1ln" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+### Demo for Windows
+[![Video Label](http://img.youtube.com/vi/WWWuKCbMYFk/0.jpg)](https://youtu.be/WWWuKCbMYFk?t=0s)
