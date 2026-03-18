@@ -1,7 +1,7 @@
 Simple lineage andriod rooting
 ===
 
-This program allows you to easily perform rooting-related functions on Lineage Android.
+This program allows you to easily perform root required level functions on Lineage Android without any rooting.
 
 ### Requirements
 * Lineage OS installed device.
