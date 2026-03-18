@@ -67,6 +67,8 @@ void process(int sd) {
 		exit(1);
 	}
 
+	setvbuf(fp, NULL, _IONBF, 0); // Disable caching
+
 	char result[BUFSIZE];
 	while (::fgets(result, BUFSIZE, fp) != nullptr) {
 		size_t len = strlen(result);
