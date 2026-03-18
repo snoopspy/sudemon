@@ -26,7 +26,7 @@ cp ../../bin/android-uninstall .
 #
 # linux compress
 #
-tar czf sudemon-$(sed 's/"//g' ../../version.txt).tar.gz *
+tar czf sudemon-linux-$(sed 's/"//g' ../../version.txt).tar.gz *
 cd ..
 
 #
@@ -49,5 +49,5 @@ cp ../../bin/android-uninstall.bat .
 #
 # win compress
 #
-zip sudemon-$(sed 's/"//g' ../../version.txt).zip *
+zip sudemon-win-$(sed 's/"//g' ../../version.txt).zip *
 cd ..

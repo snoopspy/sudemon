@@ -1,6 +1,3 @@
-#!/bin/sh
-set -x
-
 adb root
 adb exec-out "mount -o rw,remount /"
 adb push su /system/bin/su2
@@ -10,5 +7,5 @@ adb push sudemon.sh /system/bin/sudemon.sh
 adb exec-out "chmod 755 /system/bin/su'"
 adb exec-out "chmod 755 /system/bin/sudemon"
 adb exec-out "chmod 755 /system/bin/sudemon.sh"
-#adb exec-out "mount -o ro,remount /"
-./android-start
+rem adb exec-out "mount -o ro,remount /"
+call .\android-start.bat
