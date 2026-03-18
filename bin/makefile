@@ -1,9 +1,11 @@
-.PHONY : clean install uninstall
+.PHONY : clean install uninstall start stop
 
 all:
 	@echo "Select:"
 	@echo "make install"
 	@echo "make uninstall"
+	@echo "make start"
+	@echo "make stop"
 
 install:
 	adb root
@@ -16,11 +18,20 @@ install:
 	adb exec-out "chmod 755 /system/bin/sudemon"
 	adb exec-out "chmod 755 /system/bin/sudemon.sh"
 	#adb exec-out "mount -o ro,remount /"
-	adb shell sudemon.sh
+	make start
 
 uninstall:
+	make stop
 	adb root
 	adb exec-out "pkill sudemon"
 	adb exec-out "mount -o rw,remount /"
 	adb exec-out "rm -f /system/bin/su /system/bin/sudemon /system/bin/sudemon.sh"
 	#adb exec-out "mount -o ro,remount /"
+
+start:
+	adb root
+	adb shell sudemon.sh
+
+stop:
+	adb root
+	adb exec-out "pkill sudemon"
