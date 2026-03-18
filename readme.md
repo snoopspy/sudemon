@@ -1,15 +1,15 @@
-imple lineage andriod rooting
+Simple lineage andriod rooting
 ===
 
 This program allows you to easily perform rooting-related functions on Lineage Android.
 
-### Prerequirements
+### Requirements
 * Lineage OS installed device.
 * Developer options elabled.
 * Root access "ADB only" selected.
 
 ### Download
-* Just download tar.gz(for linux) or zip(for windows) files in release.
+* Just download latest tar.gz(for linux) or zip(for windows) files in [release](https://gitlab.com/gilgil/sudemon/-/releases).
 
 ### Install on Android
 * Call "android-install"
