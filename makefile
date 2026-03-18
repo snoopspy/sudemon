@@ -1,4 +1,4 @@
-.PHONY : su sudemon clean install uninstall
+.PHONY : su sudemon clean
 
 all: su sudemon
 
@@ -21,9 +21,3 @@ endif
 clean:
 	cd src/su; make clean; cd ../..
 	cd src/sudemon; make clean; cd ../..
-
-install:
-	cd bin; make install; cd ..
-
-uninstall:
-	cd bin; make uninstall; cd ..
