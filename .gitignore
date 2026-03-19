@@ -1,5 +1,6 @@
 bin/
 build/
+release/
 *.stash
 *.autosave
 *.bak
@@ -7,11 +8,8 @@ build/
 *.pro.user
 *.so
 *.user
-*.tar.gz
 Makefile
 Makefile.*
 moc_*
 qrc_*
 ui_*
-
-
