@@ -21,6 +21,7 @@ cp ../../bin/sudemon.sh .
 cp ../../bin/android-install .
 cp ../../bin/android-start .
 cp ../../bin/android-stop .
+cp ../../bin/android-test .
 cp ../../bin/android-uninstall .
 
 #
@@ -44,6 +45,7 @@ cp ../../bin/sudemon.sh .
 cp ../../bin/android-install.bat .
 cp ../../bin/android-start.bat .
 cp ../../bin/android-stop.bat .
+cp ../../bin/android-test.bat .
 cp ../../bin/android-uninstall.bat .
 
 #
