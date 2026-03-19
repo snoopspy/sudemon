@@ -1,11 +1,11 @@
-Simple lineage andriod rooting
+Simple lineage android rooting
 ===
 
 This program allows you to easily perform root level required functions on Lineage Android without any rooting.
 
 ### Requirements
 * Lineage OS installed device.
-* Developer options elabled.
+* Developer options enabled.
 * Root access "ADB only" selected.
 
 ### Download
