@@ -9,7 +9,7 @@ This program allows you to easily perform root level required functions on Linea
 * Root access "ADB only" selected.
 
 ### Download
-* Just download latest tar.gz(for linux) or zip(for windows) files in [release](https://gitlab.com/gilgil/sudemon/-/releases).
+* Just download and extrace latest tar.gz(for linux) or zip(for windows) files in [release](https://gitlab.com/gilgil/sudemon/-/releases).
 
 ### Install on Android
 * Call "android-install"
