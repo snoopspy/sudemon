@@ -1,13 +1,14 @@
 #!/bin/sh
 
-output=$(adb shell ls /system/bin/sudemon 2>&1)
-# echo 'output='$output
-
-if echo "$output" | grep -i -q "no such file"; then
+output=$(adb shell '[ -f /system/bin/sudemon ] && echo "exists" || echo "not found"' 2>&1)
+if echo "$output" | grep -i -q "no devices"; then
+    echo $output
+    exit
+elif [ "$output" = "exists" ]; then
+    echo "sudemon installed"
+else
     echo "sudemon not installed"
     exit
-else
-	echo "sudemon installed"
 fi
 
 output=$(adb shell su -c whoami 2>&1)

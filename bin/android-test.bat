@@ -1,19 +1,24 @@
 @echo off
 
-:: 1. sudemon 설치 확인
-for /f "delims=" %%i in ('adb shell ls /system/bin/sudemon 2^>^&1') do set "output=%%i"
-echo %output% | findstr /i "no such file" >nul
-if %errorlevel% equ 0 (
-    echo sudemon not installed
+for /f "delims=" %%i in ('adb shell "[ -f /system/bin/sudemon ] && echo exists || echo not found" 2^>^&1') do set output=%%i
+
+echo !output! | findstr /i "no devices" >nul
+if !errorlevel! == 0 (
+    echo !output!
     exit /b
-) else (
-    echo sudemon installed
 )
 
-:: 2. sudemon 실행 중인지 확인 (root 권한 확인)
-for /f "delims=" %%i in ('adb shell su -c whoami 2^>^&1') do set "output=%%i"
-echo %output% | findstr /i "root" >nul
-if %errorlevel% equ 0 (
+if "!output!"=="exists" (
+    echo sudemon installed
+) else (
+    echo sudemon not installed
+    exit /b
+)
+
+for /f "delims=" %%i in ('adb shell su -c whoami 2^>^&1') do set output=%%i
+
+echo !output! | findstr /i "root" >nul
+if !errorlevel! == 0 (
     echo sudemon running
     exit /b
 ) else (
