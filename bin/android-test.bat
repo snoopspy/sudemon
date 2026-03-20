@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 
 for /f "delims=" %%i in ('adb shell "[ -f /system/bin/sudemon ] && echo exists || echo not found" 2^>^&1') do set output=%%i
 
