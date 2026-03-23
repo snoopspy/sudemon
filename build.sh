@@ -18,6 +18,7 @@ cd linux
 cp ../../bin/su .
 cp ../../bin/sudemon .
 cp ../../bin/sudemon.sh .
+cp ../../bin/sudemon.rc .
 cp ../../bin/android-install .
 cp ../../bin/android-start .
 cp ../../bin/android-stop .
@@ -42,6 +43,7 @@ cd win
 cp ../../bin/su .
 cp ../../bin/sudemon .
 cp ../../bin/sudemon.sh .
+cp ../../bin/sudemon.rc .
 cp ../../bin/android-install.bat .
 cp ../../bin/android-start.bat .
 cp ../../bin/android-stop.bat .
