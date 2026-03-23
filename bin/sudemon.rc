@@ -1,5 +1,5 @@
-on init
-    write /sys/fs/selinux/enforce 0
+#on init
+#    write /sys/fs/selinux/enforce 0
 
 on property:sys.boot_completed=1
     exec - root root -- /system/bin/sudemon.sh
