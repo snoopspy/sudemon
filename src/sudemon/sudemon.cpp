@@ -49,7 +49,7 @@ void signalHandler(int signo) {
 	GTRACE("aft close(sd %d)", _acceptSocket);
 }
 
-void process(int sd) {
+void run(int sd) {
 	fflush(stdout);
 	static const int BUFSIZE = 65536;
 	char buf[BUFSIZE];
@@ -64,9 +64,9 @@ void process(int sd) {
 	FILE* fp = popen(buf, "r");
 	if (fp == nullptr) {
 		GTRACE("fail to popen(%s)", buf);
-		exit(1);
+		::close(sd);
+		return;
 	}
-
 	setvbuf(fp, NULL, _IONBF, 0); // Disable caching
 
 	char result[BUFSIZE];
@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
 			break;
 		}
 
-		std::thread* t = new std::thread(process, newsd);
+		std::thread* t = new std::thread(run, newsd);
 		t->detach();
 	}
 	::close(_acceptSocket);
