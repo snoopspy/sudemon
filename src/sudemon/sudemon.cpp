@@ -50,7 +50,6 @@ void signalHandler(int signo) {
 }
 
 void run(int sd) {
-	fflush(stdout);
 	static const int BUFSIZE = 65536;
 	char buf[BUFSIZE];
 	ssize_t res = ::recv(sd, buf, BUFSIZE - 1, 0);
